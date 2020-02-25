@@ -5,9 +5,9 @@ from psycopg2 import pool
 try:
 
     postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20,user = "postgres",
-                                                password = "1234",
-                                                host = "localhost",
-                                                database = "denver_temps")
+                                                password = "mellowyellow77",
+                                                host = "env-data.cvyvifniye47.us-west-1.rds.amazonaws.com",
+                                                database = "postgres")
 
     if(postgreSQL_pool):
             print("Connection pool created successfully")

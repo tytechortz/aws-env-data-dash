@@ -1424,7 +1424,7 @@ def update_data(product):
     most_recent_data_date = last_day - timedelta(days=1)
     mrd = most_recent_data_date.strftime("%Y-%m-%d")
 
-    engine = create_engine('postgresql://postgres:1234@localhost:5432/denver_temps')
+    engine = create_engine('postgresql://postgres:mellowyellow77@env-data.cvyvifniye47.us-west-1.rds.amazonaws.com:5432/postgres')
     temperatures.to_sql('temps', engine, if_exists='append')
 
 
