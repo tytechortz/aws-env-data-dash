@@ -22,7 +22,7 @@ try:
     if(norms_connection):
         print("successfully recived connection from connection pool ")
         norms_cursor = norms_connection.cursor()
-        norms_cursor.execute("select * from dly_max_norm")
+        norms_cursor.execute("select * denver_norms")
         norm_records = norms_cursor.fetchall()
         norms_cursor.close()
 

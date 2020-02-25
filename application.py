@@ -25,6 +25,7 @@ import requests
 today = time.strftime("%Y-%m-%d")
 
 app = dash.Dash()
+application = app.server
 
 app.config.suppress_callback_exceptions = True
 
@@ -1959,4 +1960,4 @@ def update_figure_c(month_value):
   
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    application.run_server(debug=False, port=8080)
