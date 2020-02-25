@@ -1960,4 +1960,4 @@ def update_figure_c(month_value):
   
 
 if __name__ == '__main__':
-    application.run_server(debug=False, port=8080)
+    application.run(debug=False, port=8080)
