@@ -1833,7 +1833,7 @@ def update_current_stats(selected_sea, selected_product, df_fdta):
     weekly_change = today_value - week_ago_value
     record_min = df_fdta[selected_sea].min()
     record_min_difference = today_value - record_min
-    record_low_max = sorted_annual_max_all[-1]
+    record_low_max = sorted_annual_max_all[0]
     record_max_difference = today_value - record_low_max
   
     if selected_product == 'years-graph':
