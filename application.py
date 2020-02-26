@@ -971,9 +971,9 @@ def all_temps(selected_year, period):
     previous_year = int(selected_year) - 1
     try:
         connection = psycopg2.connect(user = "postgres",
-                                    password = "1234",
-                                    host = "localhost",
-                                    database = "denver_temps")
+                                    password = "mellowyellow77",
+                                    host = "env-data.cvyvifniye47.us-west-1.rds.amazonaws.com",
+                                    database = "postgres")
         cursor = connection.cursor()
 
         postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{}) ORDER BY "DATE" ASC'.format(selected_year, previous_year)
@@ -1072,14 +1072,12 @@ def update_frs_graph(all_data, input_value, g_l, min_max):
     all_data = pd.read_json(all_data)
     all_data['Date'] = pd.to_datetime(all_data['Date'], unit='ms')
     all_data.set_index(['Date'], inplace=True)
-    print(all_data)
     if g_l == '>=':
         df = all_data.loc[all_data[min_max]>=input_value]
     else:
         df = all_data.loc[all_data[min_max]<input_value]
     df_count = df.resample('Y').count()[min_max]
     df = pd.DataFrame({'DATE':df_count.index, 'Selected Days':df_count.values})
-    print(df)
     
     data = [
         go.Bar(
