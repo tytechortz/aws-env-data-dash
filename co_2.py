@@ -107,6 +107,17 @@ def co2_App():
                     ],
                         className='round1'
                     ),
+                    html.Div([
+                        html.Div('Current CO2 Value (ppm)', style={'text-align':'center'}) 
+                    ],
+                        className='round1'
+                    ),
+                    html.Div([
+                        html.Div('{}'.format(current_co2), style={'text-align':'center'}),
+                        html.Div('{}'.format(current_co2_date), style={'text-align':'center'}) 
+                    ],
+                        className='round1'
+                    ),
                 ],
                     className='three columns'
                 ),
