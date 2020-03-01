@@ -33,9 +33,7 @@ frames = [old_data, new_data]
 co2_data = pd.concat(frames)
 co2_data['value'] = co2_data['value'].replace(-999.99, np.nan)
 max_co2 = co2_data['value'].max()
-print(max_co2)
 max_co2_date = co2_data['value'].idxmax().strftime('%Y-%m-%d')
-print(max_co2_date)
 current_co2 = co2_data['value'].iloc[-1]
 current_co2_date = co2_data.index[-1].strftime('%Y-%m-%d')
 
@@ -90,7 +88,7 @@ def co2_App():
                 html.Div([
                     dcc.Graph(
                         id='co2-levels',
-                        figure=fig
+                        figure=fig,
                     ),
                 ],
                     className='nine columns'

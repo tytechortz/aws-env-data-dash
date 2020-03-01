@@ -219,9 +219,11 @@ def ice_App():
             ),
             html.Div([
                 html.Div([
-                    html.Div(
-                        id='stats'
-                    ), 
+                    dcc.Loading(
+                        id='stats-loading',
+                        children=[html.Div(id='stats')],
+                        type='default',
+                    )
                 ],
                     className='twelve columns'
                 ),

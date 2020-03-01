@@ -5,7 +5,8 @@ import dash_table as dt
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
 from homepage import Homepage
-from den_temps import temp_App, df_all_temps, current_year, ld, df_norms, df_rec_lows, df_rec_highs, year_count, today, last_day
+from den_temps import temp_App, df_all_temps, current_year, df_norms, df_rec_lows, df_rec_highs, year_count, today
+# from den_temps import temp_App, df_all_temps, annual_maxs,annual_mins, year_count, df_norms, current_year
 from ice import ice_App, sea_options, df, year_options, value_range, month_options
 from colorado_river import river_App, capacities
 from co_2 import co2_App, co2_data
@@ -49,7 +50,7 @@ def display_page(pathname):
         return Homepage()
 
 
-# CO2 callbacks
+# CO2 callbacks #############################################################
 
 # @app.callback(
 #     Output('co2-levels', 'figure'),
@@ -59,7 +60,7 @@ def display_page(pathname):
     
 
 
-# Colorado River storage callbacks
+# Colorado River storage callbacks  #############################################
 
 @app.callback(
     Output('water-stats', 'children'),
@@ -347,16 +348,14 @@ def lake_graph(lake, data):
     return {'data': traces, 'layout': layout}
 
 
-# Temperature callbacks
+# Temperature callbacks ################################################
+
 
 @app.callback(Output('all-data', 'children'),
             [Input('product', 'value')])
 def all_temps_cleaner(product_value):
-  
     cleaned_all_temps = df_all_temps
-    cleaned_all_temps.columns=['dow','sta','Date','TMAX','TMIN']
-    # cleaned_all_temps['Date'] = pd.to_datetime(cleaned_all_temps['Date'])
-    cleaned_all_temps = cleaned_all_temps.drop(['dow','sta'], axis=1)
+    print(cleaned_all_temps)
 
     return cleaned_all_temps.to_json()
 
@@ -476,15 +475,38 @@ def max_stats(product, d_max_max, admaxh, d_min_max, d_min_min, adminl, d_max_mi
     Input('date', 'date')])
 def display_climate_day_table(all_data, selected_date):
     dr = pd.read_json(all_data)
-    dr['Date'] = pd.to_datetime(dr['Date'], unit='ms')
-    dr.set_index(['Date'], inplace=True)
+    # print(dr)
+    dr.index = pd.to_datetime(dr.index, unit='ms')
+    # print(type(dr.index))
+    # dr['Date'] = pd.to_datetime(dr['Date'], unit='ms')
+    # dr.set_index(['Date'], inplace=True)
     dr = dr[(dr.index.month == int(selected_date[5:7])) & (dr.index.day == int(selected_date[8:10]))]
-    dr = dr.reset_index()
+    # dr = dr.reset_index()
+    
+    # dr.index = pd.to_datetime(dr.index, unit='ms')
+    # print(type(dr.index))
+   
+    # print(dr)
+
+    dr = dr.drop('STATION', axis=1)
+    # dr["Date"] = dr.index
+    dr.index = pd.DatetimeIndex(dr.index).strftime("%Y-%m-%d")
+    # print(dr)
+    dr['DATE'] = pd.to_datetime(dr.index).strftime("%Y-%m-%d")
+    # print(dr)
+
+    # columns=[
+    #     {"name": i, "id": i,"selectable": True} for i in dr.columns
+    # ]
+
     columns=[
-        {"name": i, "id": i,"selectable": True} for i in dr.columns
+      {'name': 'DATE', 'id': 'DATE', 'selectable': True},
+      {'name': 'TMAX', 'id': 'TMAX', 'selectable': True},
+      {'name': 'TMIN', 'id': 'TMIN', 'selectable': True},
     ]
     
-    dr['Date'] = dr['Date'].dt.strftime('%Y-%m-%d')
+    # dr['Date'] = dr.index.dt.strftime('%Y-%m-%d')
+    # dr.index = dr.index.strftime('%Y-%m-%d')
     d_max_max = dr['TMAX'].max()
     avg_of_dly_highs = dr['TMAX'].mean()
     d_min_max = dr['TMAX'].min()
@@ -541,8 +563,9 @@ def display_climate_table(value):
     Input('product', 'value')])
 def climate_day_graph(selected_date, all_data, selected_param, selected_product):
     dr = pd.read_json(all_data)
-    dr['Date'] = pd.to_datetime(dr['Date'], unit='ms')
-    dr.set_index(['Date'], inplace=True)
+    dr.index = pd.to_datetime(dr.index, unit='ms')
+    # dr['Date'] = pd.to_datetime(dr['Date'], unit='ms')
+    # dr.set_index(['Date'], inplace=True)
     dr = dr[(dr.index.month == int(selected_date[5:7])) & (dr.index.day == int(selected_date[8:10]))]
     dr['AMAX'] = dr['TMAX'].mean()
     dr['AMIN'] = dr['TMIN'].mean()
@@ -720,21 +743,20 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
     previous_year = int(selected_year) - 1
     the_selected_year = selected_year
     temps = pd.read_json(temp_data)
-    temps = temps.drop([0,1], axis=1)
-    temps.columns = ['date','TMAX','TMIN']
-    temps['date'] = pd.to_datetime(temps['date'], unit='ms')
-    temps = temps.set_index(['date'])
+  
     temps['dif'] = temps['TMAX'] - temps['TMIN']
     
     temps_cy = temps[(temps.index.year==selected_year)]
     temps_py = temps[(temps.index.year==previous_year)][-31:]
+ 
    
     df_record_highs_ly = pd.read_json(rec_highs)
-    df_record_highs_ly = df_record_highs_ly.set_index(1)
+ 
     df_record_lows_ly = pd.read_json(rec_lows)
-    df_record_lows_ly = df_record_lows_ly.set_index(1)
+  
     df_rl_cy = df_record_lows_ly[:len(temps_cy.index)]
     df_rh_cy = df_record_highs_ly[:len(temps_cy.index)]
+  
 
     df_norms = pd.read_json(norms)
     if int(the_selected_year) % 4 == 0:
@@ -743,15 +765,14 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         df_norms = df_norms.drop(df_norms.index[59])
     df_norms_cy = df_norms[:len(temps_cy.index)]
     df_norms_py = df_norms[:31]
+
+    temps_cy.loc[:,'rl'] = df_rl_cy['TMIN'].values
+    temps_cy.loc[:,'rh'] = df_rh_cy['TMAX'].values
+    temps_cy.loc[:,'nh'] = df_norms_cy['DLY-TMAX-NORMAL'].values
+    temps_cy.loc[:,'nl'] = df_norms_cy['DLY-TMIN-NORMAL'].values
    
-  
-    temps_cy.loc[:,'rl'] = df_rl_cy[0].values
-    temps_cy.loc[:,'rh'] = df_rh_cy[0].values
-    temps_cy.loc[:,'nh'] = df_norms_cy[3].values
-    temps_cy.loc[:,'nl'] = df_norms_cy[4].values
-   
-    temps_py.loc[:,'nh'] = df_norms_py[3].values
-    temps_py.loc[:,'nl'] = df_norms_py[4].values
+    temps_py.loc[:,'nh'] = df_norms_py['DLY-TMAX-NORMAL'].values
+    temps_py.loc[:,'nl'] = df_norms_py['DLY-TMIN-NORMAL'].values
    
     if period == 'spring':
         temps = temps_cy[temps_cy.index.month.isin([3,4,5])]
@@ -797,32 +818,33 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         temp_frames = [temps_py, temps_cy]
         temps = pd.concat(temp_frames, sort=True)
         date_time = date_time[:91]  
-        
-        df_record_highs_jan_feb = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(01-)|(02-)')]
+
+
+        df_record_highs_jan_feb = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(1-)|(2-)')]
         df_record_highs_dec = df_record_highs_ly[df_record_highs_ly.index.str.match(pat = '(12-)')]
         high_frames = [df_record_highs_dec, df_record_highs_jan_feb]
         df_record_highs = pd.concat(high_frames)
 
-        df_record_lows_jan_feb = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(01-)|(02-)')]
+        df_record_lows_jan_feb = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(1-)|(2-)')]
         df_record_lows_dec = df_record_lows_ly[df_record_lows_ly.index.str.match(pat = '(12-)')]
         low_frames = [df_record_lows_dec, df_record_lows_jan_feb]
         df_record_lows = pd.concat(low_frames)
 
-        df_high_norms_jan_feb = df_norms[3][0:60]
-        df_high_norms_dec = df_norms[3][335:]
+        df_high_norms_jan_feb = df_norms['DLY-TMAX-NORMAL'][0:60]
+        df_high_norms_dec = df_norms['DLY-TMAX-NORMAL'][335:]
         high_norm_frames = [df_high_norms_dec, df_high_norms_jan_feb]
         df_high_norms = pd.concat(high_norm_frames)
 
-        df_low_norms_jan_feb = df_norms[4][0:60]
-        df_low_norms_dec = df_norms[4][335:]
+        df_low_norms_jan_feb = df_norms['DLY-TMIN-NORMAL'][0:60]
+        df_low_norms_dec = df_norms['DLY-TMIN-NORMAL'][335:]
         low_norm_frames = [df_low_norms_dec, df_low_norms_jan_feb]
         df_low_norms = pd.concat(low_norm_frames)
 
         bar_x = date_time
         nh_value = df_high_norms
         nl_value = df_low_norms
-        rh_value = df_record_highs[0]
-        rl_value = df_record_lows[0]
+        rh_value = df_record_highs['TMAX']
+        rl_value = df_record_lows['TMIN']
 
     elif period == 'annual':
         temps = temps_cy
@@ -882,11 +904,13 @@ def update_figure(temp_data, rec_highs, rec_lows, norms, selected_year, period):
         )
     return {'data': trace, 'layout': layout}, temps.to_json()
 
+
 @app.callback(
     Output('graph-stats', 'children'),
     [Input('temps', 'children'),
     Input('product','value')])
 def display_graph_stats(temps, selected_product):
+    time.sleep(1)
     temps = pd.read_json(temps)
     temps.index = pd.to_datetime(temps.index, unit='ms')
     temps = temps[np.isfinite(temps['TMAX'])]
@@ -969,35 +993,42 @@ def display_graph_stats(temps, selected_product):
              Input('period', 'value')])
 def all_temps(selected_year, period):
     previous_year = int(selected_year) - 1
-    try:
-        connection = psycopg2.connect(user = "postgres",
-                                    password = "mellowyellow77",
-                                    host = "env-data.cvyvifniye47.us-west-1.rds.amazonaws.com",
-                                    database = "postgres")
-        cursor = connection.cursor()
 
-        postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{}) ORDER BY "DATE" ASC'.format(selected_year, previous_year)
-        # postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE
-        cursor.execute(postgreSQL_select_year_Query)
-        temp_records = cursor.fetchall()
-        df = pd.DataFrame(temp_records)
+    temp_records = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2020-02-26&units=standard')
+
+    temp_records['DATE'] = pd.to_datetime(temp_records['DATE'])
+    temp_records = temp_records.set_index('DATE')
+
+    # try:
+    #     connection = psycopg2.connect(user = "postgres",
+    #                                 password = "mellowyellow77",
+    #                                 host = "env-data.cvyvifniye47.us-west-1.rds.amazonaws.com",
+    #                                 database = "postgres")
+    #     cursor = connection.cursor()
+
+    #     postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE EXTRACT(year FROM "DATE"::TIMESTAMP) IN ({},{}) ORDER BY "DATE" ASC'.format(selected_year, previous_year)
+    #     # postgreSQL_select_year_Query = 'SELECT * FROM temps WHERE
+    #     cursor.execute(postgreSQL_select_year_Query)
+    #     temp_records = cursor.fetchall()
+    #     df = pd.DataFrame(temp_records)
         
-    except (Exception, psycopg2.Error) as error :
-        print ("Error while fetching data from PostgreSQL", error)
+    # except (Exception, psycopg2.Error) as error :
+    #     print ("Error while fetching data from PostgreSQL", error)
     
-    finally:
-        #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
+    # finally:
+    #     #closing database connection.
+    #     if(connection):
+    #         cursor.close()
+    #         connection.close()
+    #         print("PostgreSQL connection is closed")
 
-    return df.to_json()
+    return temp_records.to_json(date_format='iso')
 
 @app.callback(Output('norms', 'children'),
              [Input('product', 'value')])
 def norm_highs(product):
     norms = df_norms
+    print(norms)
     return norms.to_json()
 
 @app.callback(Output('rec-highs', 'children'),
@@ -1006,7 +1037,7 @@ def rec_high_temps(selected_year):
     if int(selected_year) % 4 == 0:
         rec_highs = df_rec_highs
     else:
-        rec_highs = df_rec_highs.drop(df_rec_highs.index[59])
+        rec_highs = df_rec_highs.drop(df_rec_lows.index[59])
     return rec_highs.to_json()
 
 @app.callback(Output('rec-lows', 'children'),
@@ -1070,8 +1101,9 @@ def update_frs_graph(selected_product,):
 def update_frs_graph(all_data, input_value, g_l, min_max):
     
     all_data = pd.read_json(all_data)
-    all_data['Date'] = pd.to_datetime(all_data['Date'], unit='ms')
-    all_data.set_index(['Date'], inplace=True)
+    all_data.index = pd.to_datetime(all_data.index, unit='ms')
+    # all_data['Date'] = pd.to_datetime(all_data['Date'], unit='ms')
+    # all_data.set_index(['Date'], inplace=True)
     if g_l == '>=':
         df = all_data.loc[all_data[min_max]>=input_value]
     else:
@@ -1111,8 +1143,9 @@ def fyma_stuff(product):
 def display_fyma_stats(selected_param, all_data):
     # print(product)
     fyma_temps = pd.read_json(all_data)
-    fyma_temps['Date'] = pd.to_datetime(fyma_temps['Date'], unit='ms')
-    fyma_temps.set_index(['Date'], inplace=True)
+    fyma_temps.index = pd.to_datetime(fyma_temps.index, unit='ms')
+    # fyma_temps['Date'] = pd.to_datetime(fyma_temps['Date'], unit='ms')
+    # fyma_temps.set_index(['Date'], inplace=True)
 
     all_max_rolling = fyma_temps['TMAX'].dropna().rolling(window=1825)
     all_max_rolling_mean = all_max_rolling.mean()
@@ -1206,9 +1239,10 @@ def display_fyma_stats(selected_param, all_data):
     Input('all-data', 'children')])
 def update_fyma_graph(selected_param, df_5, max_trend, min_trend, all_data):
     fyma_temps = pd.read_json(all_data)
-    fyma_temps['Date'] = pd.to_datetime(fyma_temps['Date'], unit='ms')
+    fyma_temps.index = pd.to_datetime(fyma_temps.index, unit='ms')
+    # fyma_temps['Date'] = pd.to_datetime(fyma_temps['Date'], unit='ms')
     # fyma_temps['Date']=fyma_temps['Date'].dt.strftime("%Y-%m-%d") 
-    fyma_temps.set_index(['Date'], inplace=True)
+    # fyma_temps.set_index(['Date'], inplace=True)
 
     df_5 = pd.read_json(df_5)
 
@@ -1269,14 +1303,14 @@ def update_fyma_graph(selected_param, df_5, max_trend, min_trend, all_data):
     Input('product', 'value')])
 def clean_df5(all_data, product_value):
     dr = pd.read_json(all_data)
-    dr['Date'] = pd.to_datetime(dr['Date'], unit='ms')
    
-    df_date_index = df_all_temps.set_index(['Date'])
-
-    df_date_index.index = pd.to_datetime(df_date_index.index)
+    dr.index = pd.to_datetime(dr.index)
+    
+    df_date_index = df_all_temps
+  
     df_ya_max = df_date_index.resample('Y').mean()
     df5 = df_ya_max[:-1]
-    df5 = df5.drop(['dow'], axis=1)
+
 
     return df5.to_json(date_format='iso')
 
@@ -1349,24 +1383,22 @@ def update_heat_map(all_data, selected_value, normals, selected_product):
     traces = []
     month_values = {'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, 'MAY':5, 'JUN':6, 'JUL':7, 'AUG':8, 'SEP':9, 'OCT':10, 'NOV':11, 'DEC':12}
     all_data = pd.read_json(all_data)
-    all_data['Date'] = pd.to_datetime(all_data['Date'], unit='ms')
-    all_data.set_index(['Date'], inplace=True)
+    all_data.index = pd.to_datetime(all_data.index, unit='ms')
     all_data['TAVG'] = (all_data['TMAX'] + all_data['TMIN']) / 2
 
     new_all_data = pd.DataFrame()
     new_all_data['TMAX'] = all_data['TMAX'].resample('M').mean()
     new_all_data['TMIN'] = all_data['TMIN'].resample('M').mean()
     new_all_data['TAVG'] = all_data['TAVG'].resample('M').mean()
-    # new_all_data.index.dt.strftime('%b, %Y')
+   
     
     df_normals = pd.read_json(normals)
-    df_normals[2] = pd.to_datetime(df_normals[2], unit='ms')
-    df_normals.set_index([2], inplace=True)
+    df_normals.set_index(['DATE'], inplace=True)
 
     heat_norms = pd.DataFrame()
-    heat_norms['TMAX_AVG'] = df_normals[3].resample('M').mean()
-    heat_norms['TMIN_AVG'] = df_normals[4].resample('M').mean()
-    heat_norms['TAVG_AVG'] = df_normals[5].resample('M').mean()
+    heat_norms['TMAX_AVG'] = df_normals['DLY-TMAX-NORMAL'].resample('M').mean()
+    heat_norms['TMIN_AVG'] = df_normals['DLY-TMIN-NORMAL'].resample('M').mean()
+    heat_norms['TAVG_AVG'] = df_normals['DLY-AVG-NORMAL'].resample('M').mean()
   
     res = pd.merge(new_all_data.assign(grouper=new_all_data.index.month),
                    heat_norms.assign(grouper=heat_norms.index.month),
@@ -1414,20 +1446,20 @@ def update_heat_map(all_data, selected_value, normals, selected_product):
         )
     }
 
-@app.callback(Output('output-data', 'children'),
-             [Input('product', 'value')])
-def update_data(product):
+# @app.callback(Output('output-data', 'children'),
+#              [Input('product', 'value')])
+# def update_data(product):
 
-    temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=' + ld + '&endDate=' + today + '&units=standard')
+#     temperatures = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
 
-    most_recent_data_date = last_day - timedelta(days=1)
-    mrd = most_recent_data_date.strftime("%Y-%m-%d")
+#     most_recent_data_date = last_day - timedelta(days=1)
+#     mrd = most_recent_data_date.strftime("%Y-%m-%d")
 
-    engine = create_engine('postgresql://postgres:mellowyellow77@env-data.cvyvifniye47.us-west-1.rds.amazonaws.com:5432/postgres')
-    temperatures.to_sql('temps', engine, if_exists='append')
+#     engine = create_engine('postgresql://postgres:mellowyellow77@env-data.cvyvifniye47.us-west-1.rds.amazonaws.com:5432/postgres')
+#     temperatures.to_sql('temps', engine, if_exists='append')
 
 
-# Ice callbacks
+# Ice callbacks ##################################################
 
 @app.callback(
     Output('stats-n-stuff', 'children'),
@@ -1897,7 +1929,7 @@ def update_current_stats(selected_sea, selected_product, df_fdta):
 def update_figure(selected_sea, selected_year, df_fdta):
     traces = []
     df_fdta = pd.read_json(df_fdta)
-    print(df_fdta)
+    # print(df_fdta)
     # selected_years = [selected_year1,selected_year2,selected_year3,selected_year4]
     for x in selected_year:
         sorted_daily_values=df_fdta[df_fdta.index.year == x]
