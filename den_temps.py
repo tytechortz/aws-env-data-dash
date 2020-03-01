@@ -31,6 +31,9 @@ df_rec_highs = daily_highs.groupby([daily_highs.index.month, daily_highs.index.d
 high_idx = df_rec_highs.index.get_level_values(0).astype(str) + '-' + df_rec_highs.index.get_level_values(1).astype(str)
 df_rec_highs.index = high_idx
 
+last_day = df_all_temps.index[-1]
+ld = last_day.strftime("%Y-%m-%d")
+
 
 daily_lows = df_all_temps.resample('D').min()
 df_rec_lows = daily_lows.groupby([daily_lows.index.month, daily_lows.index.day]).min()
@@ -89,7 +92,7 @@ def temp_App():
             ),
             html.Div([
                 html.H6(
-                  '1950-01-01 through {}'.format(last_day),
+                  '1950-01-01 through {}'.format(ld),
                   className='twelve columns',
                   style={'text-align': 'center'})
             ],
