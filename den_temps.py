@@ -89,7 +89,7 @@ def temp_App():
             ),
             html.Div([
                 html.H6(
-                #   '1950-01-01 through {}'.format(last_day),
+                  '1950-01-01 through {}'.format(last_day),
                   className='twelve columns',
                   style={'text-align': 'center'})
             ],
