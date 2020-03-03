@@ -116,6 +116,11 @@ def co2_App():
                     ],
                         className='round1'
                     ),
+                    html.Div([
+                        html.Div('Avg For Month (ppm)', style={'text-align':'center'}) 
+                    ],
+                        className='round1'
+                    ),
                 ],
                     className='three columns'
                 ),
