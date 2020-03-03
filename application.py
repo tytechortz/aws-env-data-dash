@@ -9,7 +9,7 @@ from den_temps import temp_App, df_all_temps, current_year, df_norms, df_rec_low
 # from den_temps import temp_App, df_all_temps, annual_maxs,annual_mins, year_count, df_norms, current_year
 from ice import ice_App, sea_options, df, year_options, value_range, month_options
 from colorado_river import river_App, capacities
-from co_2 import co2_App, co2_data
+from co_2 import co2_App
 import pandas as pd
 import numpy as np
 from numpy import arange,array,ones
@@ -994,7 +994,7 @@ def display_graph_stats(temps, selected_product):
 def all_temps(selected_year, period):
     previous_year = int(selected_year) - 1
 
-    temp_records = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=2020-02-26&units=standard')
+    temp_records = pd.read_csv('https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN&stations=USW00023062&startDate=1950-01-01&endDate=' + today + '&units=standard')
 
     temp_records['DATE'] = pd.to_datetime(temp_records['DATE'])
     temp_records = temp_records.set_index('DATE')
