@@ -41,6 +41,11 @@ fig = go.Figure(data=[go.Scatter(x=co2_data.index, y=co2_data['value'], mode='ma
 
 monthly_avg = new_data.groupby([new_data.index.year, new_data.index.month]).mean()
 
+current_year = datetime.now().year
+current_month = datetime.now().month
+print(current_year)
+print(current_month)
+
 
 def co2_App():
     return html.Div(
