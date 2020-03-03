@@ -39,10 +39,8 @@ current_co2_date = co2_data.index[-1].strftime('%Y-%m-%d')
 
 fig = go.Figure(data=[go.Scatter(x=co2_data.index, y=co2_data['value'], mode='markers')])
 
+monthly_avg = new_data.groupby([new_data.index.year, new_data.index.month]).mean()
 
-
-# with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-#     print(data)
 
 def co2_App():
     return html.Div(
