@@ -47,6 +47,8 @@ print(current_year)
 print(current_month)
 this_month_avg = monthly_avg.loc[current_year, current_month].value
 print(this_month_avg)
+last_year_avg = monthly_avg.loc[current_year-1, current_month].value
+print(last_year_avg)
 
 
 def co2_App():
