@@ -124,7 +124,8 @@ def co2_App():
                     html.Div([
                         html.Div('Avg For Month (ppm)', style={'text-align':'center'}),
                         html.Div('{:.2f}'.format(this_month_avg), style={'text-align':'center'}), 
-                        html.Div('Last Year', style={'text-align':'center'}), 
+                        html.Div('Last Year', style={'text-align':'center'}),
+                        html.Div('{:.2f}'.format(last_year_avg), style={'text-align':'center'}), 
                     ],
                         className='round1'
                     ),
