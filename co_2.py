@@ -43,8 +43,6 @@ monthly_avg = new_data.groupby([new_data.index.year, new_data.index.month]).mean
 print(monthly_avg)
 current_year = datetime.now().year
 current_month = datetime.now().month
-print(current_year)
-print(current_month)
 this_month_avg = monthly_avg.loc[current_year, current_month].value
 print(this_month_avg)
 last_year_avg = monthly_avg.loc[current_year-1, current_month].value
@@ -119,12 +117,13 @@ def co2_App():
                     ),
                     html.Div([
                         html.Div('{}'.format(current_co2), style={'text-align':'center'}),
-                        html.Div('{}'.format(current_co2_date), style={'text-align':'center'}) 
+                        html.Div('{}'.format(current_co2_date), style={'text-align':'center'})
                     ],
                         className='round1'
                     ),
                     html.Div([
-                        html.Div('Avg For Month (ppm)', style={'text-align':'center'}) 
+                        html.Div('Avg For Month (ppm)', style={'text-align':'center'}),
+                        html.Div('{}'.format(this_month_avg), style={'text-align':'center'}) 
                     ],
                         className='round1'
                     ),
