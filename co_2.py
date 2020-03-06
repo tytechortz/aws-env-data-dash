@@ -40,13 +40,10 @@ current_co2_date = co2_data.index[-1].strftime('%Y-%m-%d')
 fig = go.Figure(data=[go.Scatter(x=co2_data.index, y=co2_data['value'], mode='markers')])
 
 monthly_avg = new_data.groupby([new_data.index.year, new_data.index.month]).mean()
-print(monthly_avg)
 current_year = datetime.now().year
 current_month = datetime.now().month
 this_month_avg = monthly_avg.loc[current_year, current_month].value
-print(this_month_avg)
 last_year_avg = monthly_avg.loc[current_year-1, current_month].value
-print(last_year_avg)
 
 
 def co2_App():
