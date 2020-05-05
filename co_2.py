@@ -10,11 +10,12 @@ app = dash.Dash(__name__)
 app.config['suppress_callback_exceptions']=True
 
 
-old_data = pd.read_csv('ftp://aftp.cmdl.noaa.gov/data/trace_gases/co2/in-situ/surface/mlo/co2_mlo_surface-insitu_1_ccgg_DailyData.txt', delim_whitespace=True, header=[146])
+old_data = pd.read_csv('ftp://aftp.cmdl.noaa.gov/data/trace_gases/co2/in-situ/surface/mlo/co2_mlo_surface-insitu_1_ccgg_DailyData.txt', delim_whitespace=True, header=[149])
+print(old_data)
 
 old_data = old_data.drop(['hour', 'longitude', 'latitude', 'elevation', 'intake_height', 'qcflag', 'nvalue', 'altitude', 'minute', 'second', 'site_code', 'value_std_dev'], axis=1)
 
-old_data = old_data.iloc[501:]
+old_data = old_data.iloc[505:]
 
 old_data.index = pd.to_datetime(old_data[['year', 'month', 'day']])
 old_data = old_data.drop(['year', 'month', 'day'], axis=1)
